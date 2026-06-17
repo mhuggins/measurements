@@ -72,6 +72,17 @@ export class Quantity {
     return new Quantity(Math.abs(this.magnitude), this.unit);
   }
 
+  /** Clamp this quantity to the range [`lower`, `upper`], returned in this unit. */
+  clamp(lower: Quantity, upper: Quantity): Quantity {
+    if (this.lessThan(lower)) {
+      return lower.to(this.unit);
+    }
+    if (this.greaterThan(upper)) {
+      return upper.to(this.unit);
+    }
+    return this;
+  }
+
   /** Alias for {@link plus}. */
   add(other: Quantity): Quantity {
     return this.plus(other);
@@ -222,17 +233,6 @@ export class Quantity {
   /** The sum of the given quantities, in the first one's unit; requires at least one. */
   static sum(first: Quantity, ...rest: Quantity[]): Quantity {
     return rest.reduce((total, q) => total.plus(q), first);
-  }
-
-  /** Clamp `value` to the range [`lower`, `upper`], returned in `value`'s unit. */
-  static clamp(value: Quantity, lower: Quantity, upper: Quantity): Quantity {
-    if (value.lessThan(lower)) {
-      return lower.to(value.unit);
-    }
-    if (value.greaterThan(upper)) {
-      return upper.to(value.unit);
-    }
-    return value;
   }
 }
 

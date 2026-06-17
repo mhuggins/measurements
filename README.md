@@ -206,10 +206,11 @@ floating-point rounding from a conversion may compare unequal.
 `compareTo(other)` returns `-1`, `0`, or `1`, suitable as an `Array#sort`
 comparator: `quantities.sort((a, b) => a.compareTo(b))`.
 
-## Combining many quantities
+## Combining quantities
 
-Static helpers operate on several quantities at once (each is converted as needed,
-so mixing dimensions throws `InvalidConversionError`):
+`Quantity.min`/`max`/`sum` aggregate several quantities at once; `clamp` is an
+instance method that bounds one quantity to a range. Each converts operands as
+needed, so mixing dimensions throws `InvalidConversionError`.
 
 ```ts
 import { Quantity } from "measurable";
@@ -218,10 +219,10 @@ import { kilometer, meter } from "measurable/dimensions";
 const a = new Quantity(1, kilometer);
 const b = new Quantity(500, meter);
 
-Quantity.min(a, b);                 // Quantity(500, meter) — the smaller
-Quantity.max(a, b);                 // Quantity(1, kilometer) — the larger
-Quantity.sum(a, b);                 // Quantity(1.5, kilometer) — total, in a's unit
-Quantity.clamp(b, a, new Quantity(2, kilometer)); // b bounded to [a, 2 km], in b's unit
+Quantity.min(a, b); // Quantity(500, meter) — the smaller
+Quantity.max(a, b); // Quantity(1, kilometer) — the larger
+Quantity.sum(a, b); // Quantity(1.5, kilometer) — total, in a's unit
+b.clamp(a, new Quantity(2, kilometer)); // b bounded to [a, 2 km], in b's unit
 ```
 
 ## Defining your own units
@@ -319,12 +320,12 @@ A passive handle, normally created via a dimension's builder methods rather than
 - `.plus(other)` / `.minus(other)` → `Quantity` — add/subtract another quantity (aliases: `add` / `sub`)
 - `.times(factor)` / `.dividedBy(divisor)` → `Quantity` — scale by a number (aliases: `mul` / `div`)
 - `.negate()` / `.abs()` → `Quantity`
+- `.clamp(lower, upper)` → `Quantity` — bound to a range, in this unit
 - `.equals(other)` / `.notEquals(other)` → `boolean` (aliases: `eq` / `ne`)
 - `.lessThan(other)` / `.greaterThan(other)` → `boolean` (aliases: `lt` / `gt`)
 - `.lessThanOrEqual(other)` / `.greaterThanOrEqual(other)` → `boolean` (aliases: `lte` / `gte`)
 - `.compareTo(other)` → `-1 | 0 | 1` — sort comparator
 - `Quantity.min(...quantities)` / `Quantity.max(...quantities)` / `Quantity.sum(...quantities)` → `Quantity`
-- `Quantity.clamp(value, lower, upper)` → `Quantity`
 - `Quantity.parse(input, dimension, { prefer? })` → `Quantity`
 
 ### `MeasurementSystem`

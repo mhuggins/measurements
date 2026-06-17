@@ -202,6 +202,18 @@ describe("Quantity arithmetic", () => {
     expect(new Quantity(5, meter).abs().magnitude).toBe(5);
   });
 
+  it("clamps to a range, returned in this quantity's unit", () => {
+    const lower = new Quantity(1, meter);
+    const upper = new Quantity(1, kilometer);
+    expect(new Quantity(500, meter).clamp(lower, upper).magnitude).toBe(500);
+    const belowed = new Quantity(0, meter).clamp(lower, upper);
+    expect(belowed.unit).toBe(meter);
+    expect(belowed.magnitude).toBe(1);
+    const aboved = new Quantity(5, kilometer).clamp(lower, upper);
+    expect(aboved.unit).toBe(kilometer);
+    expect(aboved.magnitude).toBe(1);
+  });
+
   it("is immutable — operands are not modified", () => {
     const a = new Quantity(1, mile);
     const b = new Quantity(1, kilometer);
@@ -285,18 +297,6 @@ describe("Quantity statics", () => {
     const total = Quantity.sum(new Quantity(1, kilometer), new Quantity(500, meter));
     expect(total.unit).toBe(kilometer);
     expect(total.magnitude).toBe(1.5);
-  });
-
-  it("clamp bounds a value, returned in the value's unit", () => {
-    const lower = new Quantity(1, meter);
-    const upper = new Quantity(1, kilometer);
-    expect(Quantity.clamp(new Quantity(500, meter), lower, upper).magnitude).toBe(500);
-    const belowed = Quantity.clamp(new Quantity(0, meter), lower, upper);
-    expect(belowed.unit).toBe(meter);
-    expect(belowed.magnitude).toBe(1);
-    const aboved = Quantity.clamp(new Quantity(5, kilometer), lower, upper);
-    expect(aboved.unit).toBe(kilometer);
-    expect(aboved.magnitude).toBe(1);
   });
 
   it("throws when mixing dimensions", () => {
