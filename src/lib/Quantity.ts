@@ -29,6 +29,125 @@ export class Quantity {
   }
 
   /**
+   * Add another quantity, returned in *this* quantity's unit. The other operand
+   * is converted into this unit first, so the two may use different units of the
+   * same dimension (e.g. `mile.plus(km)`). Throws {@link InvalidConversionError}
+   * if the operands belong to different dimensions.
+   *
+   * Note: for affine units (e.g. temperature) addition is mathematically defined
+   * but physically questionable, since it adds absolute points rather than a
+   * difference.
+   */
+  plus(other: Quantity): Quantity {
+    return new Quantity(this.magnitude + other.in(this.unit), this.unit);
+  }
+
+  /** Subtract another quantity, returned in this quantity's unit. */
+  minus(other: Quantity): Quantity {
+    return new Quantity(this.magnitude - other.in(this.unit), this.unit);
+  }
+
+  /** Scale this quantity by a dimensionless factor. */
+  times(factor: number): Quantity {
+    return new Quantity(this.magnitude * factor, this.unit);
+  }
+
+  /** Divide this quantity by a dimensionless divisor. */
+  dividedBy(divisor: number): Quantity {
+    return new Quantity(this.magnitude / divisor, this.unit);
+  }
+
+  /** Return this quantity with its magnitude negated. */
+  negate(): Quantity {
+    return new Quantity(-this.magnitude, this.unit);
+  }
+
+  /** Alias for {@link plus}. */
+  add(other: Quantity): Quantity {
+    return this.plus(other);
+  }
+
+  /** Alias for {@link minus}. */
+  sub(other: Quantity): Quantity {
+    return this.minus(other);
+  }
+
+  /** Alias for {@link times}. */
+  mul(factor: number): Quantity {
+    return this.times(factor);
+  }
+
+  /** Alias for {@link dividedBy}. */
+  div(divisor: number): Quantity {
+    return this.dividedBy(divisor);
+  }
+
+  /**
+   * Whether this quantity equals `other`, compared in this quantity's unit.
+   * Throws {@link InvalidConversionError} if the operands belong to different
+   * dimensions. Comparison is exact, so values that differ only by
+   * floating-point rounding from a conversion may compare unequal.
+   */
+  equals(other: Quantity): boolean {
+    return this.magnitude === other.in(this.unit);
+  }
+
+  /** Whether this quantity does not equal `other`. */
+  notEquals(other: Quantity): boolean {
+    return !this.equals(other);
+  }
+
+  /** Whether this quantity is less than `other`. */
+  lessThan(other: Quantity): boolean {
+    return this.magnitude < other.in(this.unit);
+  }
+
+  /** Whether this quantity is greater than `other`. */
+  greaterThan(other: Quantity): boolean {
+    return this.magnitude > other.in(this.unit);
+  }
+
+  /** Whether this quantity is less than or equal to `other`. */
+  lessThanOrEqual(other: Quantity): boolean {
+    return this.magnitude <= other.in(this.unit);
+  }
+
+  /** Whether this quantity is greater than or equal to `other`. */
+  greaterThanOrEqual(other: Quantity): boolean {
+    return this.magnitude >= other.in(this.unit);
+  }
+
+  /** Alias for {@link equals}. */
+  eq(other: Quantity): boolean {
+    return this.equals(other);
+  }
+
+  /** Alias for {@link notEquals}. */
+  ne(other: Quantity): boolean {
+    return this.notEquals(other);
+  }
+
+  /** Alias for {@link lessThan}. */
+  lt(other: Quantity): boolean {
+    return this.lessThan(other);
+  }
+
+  /** Alias for {@link greaterThan}. */
+  gt(other: Quantity): boolean {
+    return this.greaterThan(other);
+  }
+
+  /** Alias for {@link lessThanOrEqual}. */
+  lte(other: Quantity): boolean {
+    return this.lessThanOrEqual(other);
+  }
+
+  /** Alias for {@link greaterThanOrEqual}. */
+  gte(other: Quantity): boolean {
+    return this.greaterThanOrEqual(other);
+  }
+
+  /**
    * Parse a string into a `Quantity` using a dimension's known units and aliases.
    *
    *  - `"1km"`        -> `Quantity(1, kilometer)`

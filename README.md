@@ -155,6 +155,50 @@ import { shortTon, tonne } from "measurable/dimensions";
 new Quantity(1, shortTon).in(tonne); // 0.90718474
 ```
 
+## Arithmetic
+
+Quantities can be combined. `plus`/`minus` take another `Quantity` (converted into
+the receiver's unit first, so the operands may use different units of the same
+dimension); `times`/`dividedBy`/`negate` apply a dimensionless scalar. All return a
+**new** `Quantity` in the receiver's unit and leave the operands untouched.
+
+```ts
+import { Quantity } from "measurable";
+import { kilometer, mile } from "measurable/dimensions";
+
+new Quantity(1, mile).plus(new Quantity(1, kilometer));  // Quantity(1.6213…, mile)
+new Quantity(1, mile).minus(new Quantity(1, kilometer)); // Quantity(0.3786…, mile)
+new Quantity(2, mile).times(3);                          // Quantity(6, mile)
+new Quantity(6, mile).dividedBy(2);                      // Quantity(3, mile)
+```
+
+Short aliases are available: **`add`** (`plus`), **`sub`** (`minus`), **`mul`**
+(`times`), **`div`** (`dividedBy`).
+
+Combining different dimensions throws `InvalidConversionError`. Note that adding
+**affine** units (e.g. temperatures) is mathematically defined but physically
+questionable, since it adds absolute points rather than a difference.
+
+## Comparison
+
+`equals`/`notEquals`/`lessThan`/`greaterThan`/`lessThanOrEqual`/`greaterThanOrEqual`
+compare two quantities (the other is converted into the receiver's unit first),
+returning a boolean. Comparing different dimensions throws `InvalidConversionError`.
+
+```ts
+import { Quantity } from "measurable";
+import { kilometer, meter } from "measurable/dimensions";
+
+new Quantity(1, kilometer).equals(new Quantity(1000, meter));    // true
+new Quantity(1, meter).lessThan(new Quantity(1, kilometer));     // true
+new Quantity(1, kilometer).greaterThan(new Quantity(1, meter));  // true
+```
+
+Short aliases: **`eq`** (`equals`), **`ne`** (`notEquals`), **`lt`** (`lessThan`),
+**`gt`** (`greaterThan`), **`lte`** (`lessThanOrEqual`), **`gte`**
+(`greaterThanOrEqual`). Equality is exact, so values differing only by
+floating-point rounding from a conversion may compare unequal.
+
 ## Defining your own units
 
 Create a `Dimension` and add units through its builder methods. `scale` is how
@@ -246,6 +290,12 @@ A passive handle, normally created via a dimension's builder methods rather than
 - `new Quantity(magnitude, unit)`
 - `.to(target)` → `Quantity`
 - `.in(target)` → `number`
+- `.plus(other)` / `.minus(other)` → `Quantity` — add/subtract another quantity (aliases: `add` / `sub`)
+- `.times(factor)` / `.dividedBy(divisor)` → `Quantity` — scale by a number (aliases: `mul` / `div`)
+- `.negate()` → `Quantity`
+- `.equals(other)` / `.notEquals(other)` → `boolean` (aliases: `eq` / `ne`)
+- `.lessThan(other)` / `.greaterThan(other)` → `boolean` (aliases: `lt` / `gt`)
+- `.lessThanOrEqual(other)` / `.greaterThanOrEqual(other)` → `boolean` (aliases: `lte` / `gte`)
 - `Quantity.parse(input, dimension, { prefer? })` → `Quantity`
 
 ### `MeasurementSystem`

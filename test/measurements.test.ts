@@ -178,6 +178,85 @@ describe("custom dimensions", () => {
   });
 });
 
+describe("Quantity arithmetic", () => {
+  it("adds quantities of different units, result in the receiver's unit", () => {
+    const sum = new Quantity(1, mile).plus(new Quantity(1, kilometer));
+    expect(sum.unit).toBe(mile);
+    expect(sum.magnitude).toBeCloseTo(1 + 1 / 1.609344, 10); // ≈ 1.621371 mi
+  });
+
+  it("subtracts quantities of different units", () => {
+    const diff = new Quantity(1, mile).minus(new Quantity(1, kilometer));
+    expect(diff.unit).toBe(mile);
+    expect(diff.magnitude).toBeCloseTo(1 - 1 / 1.609344, 10); // ≈ 0.378629 mi
+  });
+
+  it("scales by a dimensionless factor", () => {
+    expect(new Quantity(2, meter).times(3).magnitude).toBe(6);
+    expect(new Quantity(6, meter).dividedBy(3).magnitude).toBe(2);
+    expect(new Quantity(5, meter).negate().magnitude).toBe(-5);
+  });
+
+  it("is immutable — operands are not modified", () => {
+    const a = new Quantity(1, mile);
+    const b = new Quantity(1, kilometer);
+    a.plus(b);
+    expect(a.magnitude).toBe(1);
+    expect(b.magnitude).toBe(1);
+  });
+
+  it("throws when combining different dimensions", () => {
+    expect(() => new Quantity(1, mile).plus(new Quantity(1, liter))).toThrow(
+      InvalidConversionError,
+    );
+  });
+
+  it("exposes short aliases add/sub/mul/div", () => {
+    const a = new Quantity(10, meter);
+    const b = new Quantity(5, meter);
+    expect(a.add(b).magnitude).toBe(a.plus(b).magnitude);
+    expect(a.sub(b).magnitude).toBe(a.minus(b).magnitude);
+    expect(a.mul(3).magnitude).toBe(a.times(3).magnitude);
+    expect(a.div(2).magnitude).toBe(a.dividedBy(2).magnitude);
+  });
+});
+
+describe("Quantity comparison", () => {
+  it("compares across units of the same dimension", () => {
+    expect(new Quantity(1, kilometer).equals(new Quantity(1000, meter))).toBe(true);
+    expect(new Quantity(1, meter).notEquals(new Quantity(2, meter))).toBe(true);
+    expect(new Quantity(1, meter).lessThan(new Quantity(1, kilometer))).toBe(true);
+    expect(new Quantity(1, kilometer).greaterThan(new Quantity(1, meter))).toBe(true);
+    expect(new Quantity(1, kilometer).lessThan(new Quantity(1, meter))).toBe(false);
+  });
+
+  it("exposes short aliases eq/ne/lt/gt", () => {
+    const a = new Quantity(1, kilometer);
+    const b = new Quantity(1000, meter);
+    const c = new Quantity(1, meter);
+    expect(a.eq(b)).toBe(a.equals(b));
+    expect(a.ne(c)).toBe(a.notEquals(c));
+    expect(c.lt(a)).toBe(c.lessThan(a));
+    expect(a.gt(c)).toBe(a.greaterThan(c));
+  });
+
+  it("supports inclusive comparisons lte/gte", () => {
+    const a = new Quantity(1, kilometer);
+    const equal = new Quantity(1000, meter);
+    const smaller = new Quantity(1, meter);
+    expect(a.lessThanOrEqual(equal)).toBe(true);
+    expect(a.greaterThanOrEqual(equal)).toBe(true);
+    expect(smaller.lte(a)).toBe(true);
+    expect(smaller.gte(a)).toBe(false);
+  });
+
+  it("throws when comparing different dimensions", () => {
+    expect(() => new Quantity(1, meter).equals(new Quantity(1, liter))).toThrow(
+      InvalidConversionError,
+    );
+  });
+});
+
 describe("metric prefixes", () => {
   it("fills in the SI ladder for length", () => {
     expect(new Quantity(1, kilometer).in(meter)).toBe(1000);
