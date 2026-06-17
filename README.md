@@ -116,7 +116,8 @@ imperial.express(new Quantity(5000, meter));  // Quantity(3.107…, mile)
 ```
 
 A `Quantity` also has a `toString()` that renders `"<magnitude> <unit name>"`
-(e.g. `new Quantity(5, kilometer).toString()` → `"5 kilometer"`).
+(e.g. `new Quantity(5, kilometer).toString()` → `"5 kilometer"`), and `round(decimals)`
+to trim the magnitude for display (`new Quantity(1.6213, mile).round(2)` → `1.62 mile`).
 
 ## Parsing strings
 
@@ -321,10 +322,12 @@ A passive handle, normally created via a dimension's builder methods rather than
 - `.times(factor)` / `.dividedBy(divisor)` → `Quantity` — scale by a number (aliases: `mul` / `div`)
 - `.negate()` / `.abs()` → `Quantity`
 - `.clamp(lower, upper)` → `Quantity` — bound to a range, in this unit
+- `.round(decimals?)` → `Quantity` — round the magnitude (default 0 decimals)
 - `.equals(other)` / `.notEquals(other)` → `boolean` (aliases: `eq` / `ne`)
 - `.lessThan(other)` / `.greaterThan(other)` → `boolean` (aliases: `lt` / `gt`)
 - `.lessThanOrEqual(other)` / `.greaterThanOrEqual(other)` → `boolean` (aliases: `lte` / `gte`)
 - `.compareTo(other)` → `-1 | 0 | 1` — sort comparator
+- `.isZero()` / `.isPositive()` / `.isNegative()` → `boolean`
 - `Quantity.min(...quantities)` / `Quantity.max(...quantities)` / `Quantity.sum(...quantities)` → `Quantity`
 - `Quantity.parse(input, dimension, { prefer? })` → `Quantity`
 

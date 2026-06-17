@@ -83,6 +83,12 @@ export class Quantity {
     return this;
   }
 
+  /** Return this quantity with its magnitude rounded to `decimals` places (default 0). */
+  round(decimals = 0): Quantity {
+    const factor = 10 ** decimals;
+    return new Quantity(Math.round(this.magnitude * factor) / factor, this.unit);
+  }
+
   /** Alias for {@link plus}. */
   add(other: Quantity): Quantity {
     return this.plus(other);
@@ -181,6 +187,21 @@ export class Quantity {
       return 1;
     }
     return 0;
+  }
+
+  /** Whether this quantity's magnitude is exactly zero. */
+  isZero(): boolean {
+    return this.magnitude === 0;
+  }
+
+  /** Whether this quantity's magnitude is greater than zero. */
+  isPositive(): boolean {
+    return this.magnitude > 0;
+  }
+
+  /** Whether this quantity's magnitude is less than zero. */
+  isNegative(): boolean {
+    return this.magnitude < 0;
   }
 
   /**

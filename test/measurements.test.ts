@@ -306,6 +306,23 @@ describe("Quantity statics", () => {
   });
 });
 
+describe("Quantity predicates and rounding", () => {
+  it("reports the magnitude sign", () => {
+    expect(new Quantity(0, meter).isZero()).toBe(true);
+    expect(new Quantity(5, meter).isPositive()).toBe(true);
+    expect(new Quantity(-5, meter).isNegative()).toBe(true);
+    expect(new Quantity(5, meter).isZero()).toBe(false);
+    expect(new Quantity(0, meter).isPositive()).toBe(false);
+  });
+
+  it("rounds the magnitude to the given decimals, keeping the unit", () => {
+    expect(new Quantity(1.6213, mile).round(2).magnitude).toBeCloseTo(1.62, 10);
+    expect(new Quantity(1.6213, mile).round().magnitude).toBe(2);
+    expect(new Quantity(2.5, meter).round().magnitude).toBe(3);
+    expect(new Quantity(1.2345, meter).round(2).unit).toBe(meter);
+  });
+});
+
 describe("metric prefixes", () => {
   it("fills in the SI ladder for length", () => {
     expect(new Quantity(1, kilometer).in(meter)).toBe(1000);
