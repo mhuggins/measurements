@@ -206,6 +206,25 @@ metric.express(new Quantity(5000, meter));    // Quantity(5, kilometer)
 imperial.express(new Quantity(5000, meter));  // Quantity(3.107…, mile)
 ```
 
+Under the hood, `express` just hands the system's units for that dimension to
+`Quantity.best`, the same best-fit primitive you can call directly with whatever
+units you like — handy when you want a custom shortlist rather than a whole
+system. `best` picks the largest unit whose absolute magnitude is still ≥ 1
+(falling back to the smallest when even that rounds below 1), so candidate order
+doesn't matter:
+
+```ts
+import { Quantity } from "measurable";
+import { meter, kilometer, mile } from "measurable/dimensions";
+
+new Quantity(5000, meter).best(meter, kilometer, mile);  // Quantity(3.107…, mile)
+new Quantity(1500, meter).best(meter, kilometer);        // Quantity(1.5, kilometer)
+new Quantity(500, meter).best(kilometer, mile);          // Quantity(0.5, kilometer) — smallest fallback
+```
+
+It requires at least one unit, and each must belong to the quantity's dimension
+(otherwise `InvalidConversionError`).
+
 ## Formatting output
 
 Each unit carries a canonical `symbol` (`"g"`, `"km"`, `"°C"`) and `plural`
@@ -538,6 +557,7 @@ A passive handle, normally created via a dimension's builder methods rather than
 - `.negate()` / `.abs()` → `Quantity`
 - `.clamp(lower, upper)` → `Quantity` — bound to a range, in this unit
 - `.round(decimals?)` → `Quantity` — round the magnitude (default 0 decimals)
+- `.best(...units)` → `Quantity` — re-express in the largest given unit whose absolute magnitude is still ≥ 1 (smallest as fallback); needs ≥ 1 unit, all of this dimension
 - `.equals(other)` / `.notEquals(other)` → `boolean` (aliases: `eq` / `ne`)
 - `.lessThan(other)` / `.greaterThan(other)` → `boolean` (aliases: `lt` / `gt`)
 - `.lessThanOrEqual(other)` / `.greaterThanOrEqual(other)` → `boolean` (aliases: `lte` / `gte`)

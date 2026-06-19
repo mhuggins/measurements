@@ -95,6 +95,30 @@ export class Quantity {
     return this.unit.dimension.convertRational(this.rational, this.unit, target);
   }
 
+  /**
+   * Re-express this quantity in the best-fit unit among `units`: the largest
+   * unit whose absolute magnitude is still at least 1 (falling back to the
+   * smallest unit when even that rounds below 1). Requires at least one unit,
+   * and each must belong to this quantity's dimension (else
+   * {@link InvalidConversionError}).
+   */
+  best(...units: Unit[]): Quantity {
+    const candidates = [...units].sort((a, b) => scaleOf(a) - scaleOf(b));
+    if (candidates.length === 0) {
+      throw new Error("Quantity.best requires at least one unit");
+    }
+
+    let chosen = candidates[0];
+    for (const unit of candidates) {
+      if (Math.abs(this.in(unit)) >= 1) {
+        chosen = unit;
+      } else {
+        break;
+      }
+    }
+    return this.to(chosen);
+  }
+
   /** Render as `"<magnitude> <unit name>"`, e.g. `"5 kilometer"`. */
   toString(): string {
     return `${this.magnitude} ${this.unit.name}`;

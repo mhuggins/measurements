@@ -1,4 +1,3 @@
-import { scaleOf } from "../utils/scaleOf";
 import type { Dimension } from "./Dimension";
 import { Quantity } from "./Quantity";
 import type { Unit } from "./Unit";
@@ -41,23 +40,13 @@ export class MeasurementSystem {
    * to the smallest unit when even that rounds below 1).
    */
   express(quantity: Quantity): Quantity {
-    const candidates = this.in(quantity.unit.dimension).sort((a, b) => scaleOf(a) - scaleOf(b));
+    const candidates = this.in(quantity.unit.dimension);
     if (candidates.length === 0) {
       throw new Error(
-        `Measurement system "${this.name}" has no ` +
-          `"${quantity.unit.dimension.name}" units to express in`,
+        `Measurement system "${this.name}" has no "${quantity.unit.dimension.name}" units to express in`,
       );
     }
 
-    const base = quantity.unit.toBase(quantity.magnitude);
-    let chosen = candidates[0];
-    for (const unit of candidates) {
-      if (Math.abs(unit.fromBase(base)) >= 1) {
-        chosen = unit;
-      } else {
-        break;
-      }
-    }
-    return quantity.to(chosen);
+    return quantity.best(...candidates);
   }
 }

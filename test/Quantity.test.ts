@@ -217,6 +217,43 @@ describe("Quantity", () => {
     });
   });
 
+  describe("best", () => {
+    it("picks the largest unit whose magnitude is still at least 1", () => {
+      const best = new Quantity(5000, meter).best(meter, kilometer, mile);
+      expect(best.unit).toBe(mile);
+    });
+
+    it("converts the magnitude into the chosen unit", () => {
+      const best = new Quantity(1500, meter).best(meter, kilometer);
+      expect(best.unit).toBe(kilometer);
+      expect(best.magnitude).toBe(1.5);
+    });
+
+    it("falls back to the smallest unit when even it rounds below 1", () => {
+      const best = new Quantity(500, meter).best(kilometer, mile);
+      expect(best.unit).toBe(kilometer);
+      expect(best.magnitude).toBe(0.5);
+    });
+
+    it("compares by absolute magnitude", () => {
+      const best = new Quantity(-5000, meter).best(meter, kilometer, mile);
+      expect(best.unit).toBe(mile);
+    });
+
+    it("is order-independent (sorts candidates by scale)", () => {
+      const best = new Quantity(5000, meter).best(mile, meter, kilometer);
+      expect(best.unit).toBe(mile);
+    });
+
+    it("requires at least one unit", () => {
+      expect(() => new Quantity(1, meter).best()).toThrow("at least one unit");
+    });
+
+    it("throws when a candidate belongs to another dimension", () => {
+      expect(() => new Quantity(1, meter).best(liter)).toThrow(InvalidConversionError);
+    });
+  });
+
   describe("predicates and rounding", () => {
     it("reports the magnitude sign", () => {
       expect(new Quantity(0, meter).isZero()).toBe(true);
