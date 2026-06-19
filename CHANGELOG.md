@@ -5,6 +5,40 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-06-19
+
+This release adds a best-fit primitive and gives every thrown error a dedicated,
+catchable class. All changes are backward-compatible.
+
+### Added
+
+- **`Quantity.best(...units)`** — re-expresses a quantity in the best-fit unit
+  among the given ones: the largest unit whose absolute magnitude is still ≥ 1
+  (falling back to the smallest). Candidate order doesn't matter; each must
+  belong to the quantity's dimension.
+- **Dedicated error classes**, all extending `Error` and exported from
+  `measurable`, so failures can be branched on with `instanceof`:
+  `ArgumentError` (invalid argument — e.g. `best()` with no units, or a
+  non-integer / zero-denominator / non-finite `Rational`), `ParseError` (a string
+  could not be parsed into a quantity), `DuplicateUnitError` (a unit name already
+  exists in its dimension), and `UnsupportedDimensionError` (a measurement system
+  has no units of a dimension to `express` in).
+
+### Changed
+
+- **`MeasurementSystem.express` now delegates to `Quantity.best`** — same
+  behavior, with the best-fit logic living in one place.
+- **Every previously bare `throw new Error` now throws a dedicated class.**
+  Messages are unchanged and all classes extend `Error`, so existing `catch`
+  blocks keep working.
+
+### Deprecated
+
+- **`InvalidConversionError` is renamed to `DimensionMismatchError`** — it is
+  thrown for any cross-dimension operation (converting, comparing, or combining
+  units), not just conversions. The old name remains exported as a deprecated
+  alias of the same class and still works with `instanceof`.
+
 ## [3.0.0] - 2026-06-18
 
 This release adds value **formatting**. Units now carry a `symbol` and `plural`,
@@ -142,6 +176,7 @@ to a `number` at the edge, so `foot → inch` is exactly `12` (not
   `MeasurementSystem`), string parsing via `Quantity.parse`, and the first set
   of built-in dimensions and measurement systems.
 
+[3.1.0]: https://github.com/mhuggins/measurable/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/mhuggins/measurable/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/mhuggins/measurable/compare/v1.1.1...v2.0.0
 [1.1.1]: https://github.com/mhuggins/measurable/compare/v1.1.0...v1.1.1
